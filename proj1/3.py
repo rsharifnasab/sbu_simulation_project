@@ -28,6 +28,6 @@ def simulation(number_of_iterations, n):
 n = 50
 distribution = simulation(100, n)
 plt.plot(distribution)
-one = np.log(n)/n
+one = np.log(n) * n / 2
 plt.axvline(x = one, color = 'r')
 plt.show()

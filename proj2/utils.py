@@ -40,6 +40,7 @@ def is_irreducable(G):
 
 def calculate_irreducablity_probability_mean(n, p_list, epochs, graph_type):
     mean_list = []
+    equation_3s = []
     for p in p_list:
         mean = 0
         for i in range(epochs):
@@ -54,7 +55,12 @@ def calculate_irreducablity_probability_mean(n, p_list, epochs, graph_type):
             # draw_graph(graph)
             if nx.is_connected(graph):
                 mean += 1
+            equation_3s += calculate_equation_3(graph, p)
         mean /= epochs
         # print(mean)
         mean_list.append(mean)
-    return mean_list
+    return mean_list, equation_3s
+
+def calculate_equation_3(G, p):
+    sum = np.sum([p**k_i[1] for k_i in G.degree])
+    return np.e**(-(1-p)*sum)

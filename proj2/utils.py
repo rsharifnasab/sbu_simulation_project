@@ -42,21 +42,22 @@ def is_irreducable(G):
     return nx.algorithms.all_pairs_node_connectivity(G)
 
 
-def calculate_irreducablity_probability_mean(n, p_list, epochs, graph_type):
+graph_providers = {
+    'ER': lambda n, p: nx.erdos_renyi_graph(n=n, p=p), # ok
+    'WS': lambda n, p: nx.newman_watts_strogatz_graph(n=n, k=int(0.4 * n), p=p),
+    'BA': lambda n, p: nx.barabasi_albert_graph(n=n+1, m=int(n**p))
+}
+GRAPH_TYPES = graph_providers.keys()
+
+
+def calculate_irreducablity_probability_mean(n, p_list, epochs, graph_provider):
     mean_list = []
     equation_3s = []
     for p in p_list:
         no_connected = 0
         equation_tmp = []
         for _ in range(epochs):
-            if graph_type == 'ER':
-                graph = nx.erdos_renyi_graph(n=n, p=p)
-            elif graph_type == 'WS':
-                graph = nx.newman_watts_strogatz_graph(n=n, k=n//10, p=p)
-            elif graph_type == 'BA':
-                graph = nx.barabasi_albert_graph(n=n+1, m=int(n**p))
-            else:
-                raise RuntimeError
+            graph = graph_provider(n, p)
             # draw_graph(graph)
             if nx.is_connected(graph):
                 no_connected += 1
@@ -69,5 +70,5 @@ def calculate_irreducablity_probability_mean(n, p_list, epochs, graph_type):
 
 
 def calculate_equation_3(G, p):
-    sum = np.sum([p**k_i[1] for k_i in G.degree])
-    return np.e**(-(1-p)*sum)
+    summ = np.sum([p**k_i[1] for k_i in G.degree])
+    return np.e**(-(1-p)*summ)

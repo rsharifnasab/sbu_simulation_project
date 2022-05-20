@@ -4,7 +4,8 @@ from utils import calculate_irreducablity_probability_mean, graph_providers, GRA
 import matplotlib.pyplot as plt
 
 EPOCHS = 1000
-DRAW_POINTS = 30
+N_UP_LIMIT = 200
+
 
 
 
@@ -14,7 +15,7 @@ def calculate_and_save_fig(graph_type):
 
     figure, ax = plt.subplots(nrows=2, ncols=5,
                               figsize=(20, 8), sharex=True, sharey=True)
-    for i, n in zip(range(10), np.geomspace(2, DRAW_POINTS, 10, dtype=int), strict=True):
+    for i, n in zip(range(10), np.geomspace(2, N_UP_LIMIT, 10, dtype=int), strict=True):
         probability_mean_list, equation_3s = calculate_irreducablity_probability_mean(
             n, p_list, EPOCHS, graph_provider)
         ax[i//5, i % 5].plot(p_list, probability_mean_list,

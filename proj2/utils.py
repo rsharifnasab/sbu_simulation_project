@@ -34,7 +34,7 @@ def create_initial_matrix(n, p):
 
 def is_irreducable(G):
     """
-    Checks if given 'G' matrix is reducable.
+    Checks if given 'G' matrix is irreducable.
 
     Args:
         G (networkx.Graph)
@@ -44,7 +44,7 @@ def is_irreducable(G):
 
 graph_providers = {
     'ER': lambda n, p: nx.erdos_renyi_graph(n=n, p=p), # ok
-    'WS': lambda n, p: nx.newman_watts_strogatz_graph(n=n, k=int(0.4 * n), p=p),
+    'WS': lambda n, p: nx.newman_watts_strogatz_graph(n=n, k=int(0.1 * n), p=p),
     'BA': lambda n, p: nx.barabasi_albert_graph(n=n+1, m=int(n**p))
 }
 GRAPH_TYPES = graph_providers.keys()

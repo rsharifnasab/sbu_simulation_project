@@ -2,6 +2,7 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
+
 def draw_graph(G):
     options = {
         "font_size": 10,
@@ -13,6 +14,7 @@ def draw_graph(G):
     }
     nx.draw(G, **options)
     plt.show()
+
 
 def create_initial_matrix(n, p):
     """
@@ -29,6 +31,7 @@ def create_initial_matrix(n, p):
     np.fill_diagonal(mat, 0)
     return mat >= p
 
+
 def is_irreducable(G):
     """
     Checks if given 'G' matrix is reducable.
@@ -38,12 +41,14 @@ def is_irreducable(G):
     """
     return nx.algorithms.all_pairs_node_connectivity(G)
 
+
 def calculate_irreducablity_probability_mean(n, p_list, epochs, graph_type):
     mean_list = []
     equation_3s = []
     for p in p_list:
-        mean = 0
-        for i in range(epochs):
+        no_connected = 0
+        equation_tmp = []
+        for _ in range(epochs):
             if graph_type == 'ER':
                 graph = nx.erdos_renyi_graph(n=n, p=p)
             elif graph_type == 'WS':
@@ -54,12 +59,14 @@ def calculate_irreducablity_probability_mean(n, p_list, epochs, graph_type):
                 raise RuntimeError
             # draw_graph(graph)
             if nx.is_connected(graph):
-                mean += 1
-            equation_3s += calculate_equation_3(graph, p)
-        mean /= epochs
-        # print(mean)
-        mean_list.append(mean)
+                no_connected += 1
+            equation_tmp.append(calculate_equation_3(graph, p))
+
+        # print(no_connected / epochs)
+        equation_3s.append(sum(equation_tmp) / len(equation_tmp))
+        mean_list.append(no_connected / epochs)
     return mean_list, equation_3s
+
 
 def calculate_equation_3(G, p):
     sum = np.sum([p**k_i[1] for k_i in G.degree])

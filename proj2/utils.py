@@ -72,3 +72,63 @@ def calculate_irreducablity_probability_mean(n, p_list, epochs, graph_provider):
 def calculate_equation_3(G, p):
     summ = np.sum([p**k_i[1] for k_i in G.degree])
     return np.e**(-(1-p)*summ)
+
+def calculate_survival_time(n, l, s=None,
+                            p_list=np.linspace(0.1, 1, 10, dtype=float),
+                            # p_list=[0.5],
+                            mode='Static',
+                            number_of_simulations=100):
+    df = None
+    for p in p_list:
+        k_Et_dict = {}
+        for _ in range(number_of_simulations):
+            k_list = []
+            graph = graph_providers["ER"](n, p)
+            remove_nodes_priority = [x for _, x in sorted(zip(l, graph.nodes))]
+            for node in remove_nodes_priority:
+                graph.remove_node(node)
+                if (graph.number_of_nodes() == 0 or not nx.is_connected(graph)):
+                    break
+                k = (graph.number_of_edges() * 2) // graph.number_of_nodes()
+                k_list.append(k)
+            # calculate how long it takes from each <k> for a graph to become disconnected
+            k_list_size = len(k_list)
+            k_prev = None
+            k_prev_counter = 0
+            k_prev_sum = 0
+            for k in k_list:
+                # print(f'k: {k},\tk_prev: {k_prev},\tk_prev_counter: {k_prev_counter},\tk_prev_sum: {k_prev_sum},\tk_list_size: {k_list_size}')
+                if (k != k_prev):
+                    if k_prev is None:
+                        k_prev = k
+                        k_prev_counter = 1
+                        k_prev_sum = k_list_size
+                        k_list_size -= 1
+                    else:
+                        if k_prev in k_Et_dict.keys():
+                            k_Et_dict[k_prev] += k_prev_sum / k_prev_counter
+                        else:
+                            k_Et_dict[k_prev] = k_prev_sum / k_prev_counter
+                        # print(f'k_prev: {k_prev},\tk_Et_dict[k_prev]: {k_Et_dict[k_prev]}')
+                        k_prev = k
+                        k_prev_counter = 1
+                        k_prev_sum = k_list_size
+                        k_list_size -= 1
+                else:
+                    k_prev_counter += 1
+                    k_prev_sum += k_list_size
+                    k_list_size -= 1
+        if (len(k_Et_dict) == 0):
+            continue
+        lists = sorted(k_Et_dict.items())
+        x, y = zip(*lists)
+        if df is None:
+            df = pd.DataFrame({'k':x, 'E_t':np.array(y)/number_of_simulations, 'p':[p for _ in range(len(x))]})
+        else:
+            _ = pd.DataFrame({'k':x, 'E_t':np.array(y)/number_of_simulations, 'p':[p for _ in range(len(x))]})
+            df = pd.concat([df, _], ignore_index=True)
+    df.to_csv('simulation_output.csv', index=False)
+    fig = px.line(df, x='k', y='E_t', color='p')
+    fig.show()
+    fig.write_html("out.html")
+    pass

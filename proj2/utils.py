@@ -132,7 +132,7 @@ def calculate_survival_time(n, l, s=None,
     df.to_csv('simulation_output_survival_time.csv', index=False)
     fig = px.line(df, x='k', y='E_t', color='p')
     fig.show()
-    fig.write_html("out.html")
+    fig.write_html("simulation_survival_time.html")
     pass
 
 def simulate_isolation_by_distribution(n, number_of_simulations=100, pareto_scale=2.62):

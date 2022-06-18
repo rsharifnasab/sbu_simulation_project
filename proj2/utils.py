@@ -128,7 +128,7 @@ def calculate_survival_time(n, l, s=None,
         else:
             _ = pd.DataFrame({'k':x, 'E_t':np.array(y)/number_of_simulations, 'p':[p for _ in range(len(x))]})
             df = pd.concat([df, _], ignore_index=True)
-    df.to_csv('simulation_output.csv', index=False)
+    df.to_csv('simulation_output_survival_time.csv', index=False)
     fig = px.line(df, x='k', y='E_t', color='p')
     fig.show()
     fig.write_html("out.html")

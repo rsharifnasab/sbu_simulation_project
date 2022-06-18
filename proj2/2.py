@@ -1,5 +1,5 @@
 import numpy as np
-from utils import calculate_survival_time
+from utils import calculate_survival_time, simulate_isolation_by_distribution
 import matplotlib.pyplot as plt
 
 EPOCHS = 1000
@@ -18,4 +18,8 @@ if L_DISTRIBUTION == 'Exponential':
 elif L_DISTRIBUTION == 'Pareto':
     l = np.random.pareto(PARETO_SHAPE, size=N_UP_LIMIT) * PARETO_SCALE
 
+# Part a
 calculate_survival_time(N_UP_LIMIT, l, mode=MODE)
+
+# Part d
+simulate_isolation_by_distribution(N_UP_LIMIT//10, number_of_simulations=EPOCHS, pareto_scale=PARETO_SCALE)

@@ -3,6 +3,7 @@ import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 import plotly.express as px
+from scipy.stats import pareto, expon
 
 
 def draw_graph(G):
@@ -133,3 +134,36 @@ def calculate_survival_time(n, l, s=None,
     fig.show()
     fig.write_html("out.html")
     pass
+
+def simulate_isolation_by_distribution(n, number_of_simulations=100, pareto_scale=2.62):
+    number_of_plotting_points = 100
+    expo_list = []
+    expo_isolation_list = []
+    pareto_list = []
+    pareto_isolation_list = []
+    for distro in [expon, pareto]:
+        if distro.name == 'expon':
+            p_list = [distro.pdf(x) for x in np.linspace(distro.ppf(0.01), distro.ppf(0.99), number_of_plotting_points)]
+        else:
+            p_list = [distro.pdf(x, pareto_scale) for x in np.linspace(distro.ppf(0.01, pareto_scale), distro.ppf(0.99, pareto_scale), number_of_plotting_points)]
+
+        for p in p_list:
+            isolation_rate = 0
+            for _ in range(number_of_simulations):
+                graph = graph_providers["ER"](n, p)
+                if nx.is_connected(graph):
+                    isolation_rate += 1
+            isolation_rate /= number_of_simulations
+            if distro.name == 'expon':
+                expo_list.append(p)
+                expo_isolation_list.append(isolation_rate)
+            else:
+                pareto_list.append(p)
+                pareto_isolation_list.append(isolation_rate)
+    _expo = pd.DataFrame({'p': expo_list, 'isolation_rate': expo_isolation_list, 'distribution': ['expo' for _ in range(number_of_plotting_points)]})
+    _pareto = pd.DataFrame({'p': pareto_list, 'isolation_rate': pareto_isolation_list, 'distribution': ['pareto' for _ in range(number_of_plotting_points)]})
+    df = pd.concat([_expo, _pareto], ignore_index=True)
+    df.to_csv('simulation_output_isolation_by_distribution.csv', index=False)
+    fig = px.line(df, x='p', y='isolation_rate', color='distribution')
+    fig.show()
+    fig.write_html("simulate_isolation_by_distribution.html")

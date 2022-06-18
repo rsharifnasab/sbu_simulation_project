@@ -1,6 +1,8 @@
 import numpy as np
+import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
+import plotly.express as px
 
 
 def draw_graph(G):
@@ -84,26 +86,27 @@ def calculate_survival_time(n, l, s=None,
         for _ in range(number_of_simulations):
             k_list = []
             graph = graph_providers["ER"](n, p)
-            remove_nodes_priority = [x for _, x in sorted(zip(l, graph.nodes))]
+            remove_nodes_priority = [(x, y) for x, y in sorted(zip(l, graph.nodes))]
             for node in remove_nodes_priority:
-                graph.remove_node(node)
+                graph.remove_node(node[1])
                 if (graph.number_of_nodes() == 0 or not nx.is_connected(graph)):
                     break
                 k = (graph.number_of_edges() * 2) // graph.number_of_nodes()
                 k_list.append(k)
             # calculate how long it takes from each <k> for a graph to become disconnected
-            k_list_size = len(k_list)
             k_prev = None
             k_prev_counter = 0
             k_prev_sum = 0
-            for k in k_list:
+            for i in range(len(k_list)):
+                k = k_list[i]
+                curr_time = remove_nodes_priority[-i][0]
+                # print(k, curr_time)
                 # print(f'k: {k},\tk_prev: {k_prev},\tk_prev_counter: {k_prev_counter},\tk_prev_sum: {k_prev_sum},\tk_list_size: {k_list_size}')
                 if (k != k_prev):
                     if k_prev is None:
                         k_prev = k
                         k_prev_counter = 1
-                        k_prev_sum = k_list_size
-                        k_list_size -= 1
+                        k_prev_sum = curr_time
                     else:
                         if k_prev in k_Et_dict.keys():
                             k_Et_dict[k_prev] += k_prev_sum / k_prev_counter
@@ -112,12 +115,10 @@ def calculate_survival_time(n, l, s=None,
                         # print(f'k_prev: {k_prev},\tk_Et_dict[k_prev]: {k_Et_dict[k_prev]}')
                         k_prev = k
                         k_prev_counter = 1
-                        k_prev_sum = k_list_size
-                        k_list_size -= 1
+                        k_prev_sum = curr_time
                 else:
                     k_prev_counter += 1
-                    k_prev_sum += k_list_size
-                    k_list_size -= 1
+                    k_prev_sum += curr_time
         if (len(k_Et_dict) == 0):
             continue
         lists = sorted(k_Et_dict.items())

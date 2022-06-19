@@ -166,3 +166,34 @@ def simulate_isolation_by_distribution(n, number_of_simulations=100, pareto_scal
     fig = px.line(df, x='p', y='isolation_rate', color='distribution')
     fig.show()
     fig.write_html("simulate_isolation_by_distribution.html")
+
+def simulate_isolation_survival_by_pareto_shape(n, number_of_simulations=100, scale=1, number_of_plotting_points=100):
+    shape_list = []
+    p_list = []
+    isolation_list = []
+    survival_list = []
+
+    for shape in np.geomspace(0.01, 10, 100):
+        pareto_list = [(shape*pareto.pdf(x, scale)) for x in np.linspace(pareto.ppf(0.01, scale), pareto.ppf(0.99, scale), number_of_plotting_points)]
+        survival_time = np.max(pareto_list)
+        for p in pareto_list:
+            isolation_rate = 0
+            for _ in range(number_of_simulations):
+                graph = graph_providers["ER"](n, p)
+                if nx.is_connected(graph):
+                    isolation_rate += 1
+            isolation_rate /= number_of_simulations
+            p_list.append(p)
+            isolation_list.append(isolation_rate)
+            shape_list.append(shape)
+            survival_list.append(survival_time)
+        
+    df = pd.DataFrame({'p': p_list, 'isolation_rate': isolation_list, 'shape': shape_list, 'survival_time': survival_list})
+    df.to_csv('simulation_output_isolation_survival_by_pareto_shape.csv', index=False)
+    fig = px.scatter_3d(df, x='p', y='isolation_rate', z='survival_time', color='shape')
+    fig.show()
+    fig.write_html("simulate_isolation_survival_by_pareto_shape.html")
+    fig = px.line(df, x='p', y='isolation_rate', color='shape')
+    fig.write_html("simulate_isolation_by_pareto_shape.html")
+    fig = px.line(df, x='p', y='survival_time', color='shape')
+    fig.write_html("simulate_survival_by_pareto_shape.html")

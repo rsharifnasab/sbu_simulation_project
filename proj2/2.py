@@ -1,5 +1,5 @@
 import numpy as np
-from utils import calculate_survival_time, simulate_isolation_by_distribution
+from utils import calculate_survival_time, simulate_isolation_by_distribution, simulate_isolation_survival_by_pareto_shape
 import matplotlib.pyplot as plt
 
 EPOCHS = 1000
@@ -23,3 +23,6 @@ calculate_survival_time(N_UP_LIMIT, l, mode=MODE)
 
 # Part d
 simulate_isolation_by_distribution(N_UP_LIMIT//10, number_of_simulations=EPOCHS, pareto_scale=PARETO_SCALE)
+
+# Part e
+simulate_isolation_survival_by_pareto_shape(N_UP_LIMIT//10, number_of_simulations=EPOCHS, scale=PARETO_SCALE, number_of_plotting_points=1000)

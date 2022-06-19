@@ -16,7 +16,7 @@ PARETO_SHAPE = 3
 if L_DISTRIBUTION == 'Exponential':
     l = np.random.exponential(scale=1/EXPO_LAMBDA, size=N_UP_LIMIT)
 elif L_DISTRIBUTION == 'Pareto':
-    l = np.random.pareto(PARETO_SHAPE, size=N_UP_LIMIT) * PARETO_SCALE
+    l = np.random.pareto(PARETO_SCALE, size=N_UP_LIMIT) * PARETO_SHAPE
 
 # Part a
 calculate_survival_time(N_UP_LIMIT, l, mode=MODE)

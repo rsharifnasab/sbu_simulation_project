@@ -135,8 +135,7 @@ def calculate_survival_time(n, l, s=None,
     fig.write_html("simulation_survival_time.html")
     pass
 
-def simulate_isolation_by_distribution(n, number_of_simulations=100, pareto_scale=2.62):
-    number_of_plotting_points = 100
+def simulate_isolation_by_distribution(n, number_of_simulations=100, pareto_scale=2.62, number_of_plotting_points = 100):
     expo_list = []
     expo_isolation_list = []
     pareto_list = []

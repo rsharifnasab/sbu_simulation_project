@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Simulation Project</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel="stylesheet" href="./static/style.css">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
+
+</head>
+
+<body>
+    <!-- partial:index.partial.html -->
+    <div class="wrapper">
+        <div class="wheel closed">
+            <form action="/" method="post" 'onsubmit="return false;" '>
+                <ul>
+                    <li>
+                        <label class="sent-label">Thank You Dr Safaee!</label>
+                        <input placeholder="Hi there! Press Tab..." tabindex="1" readonly>
+                    </li>
+                    <li>
+                        <input placeholder="This is Matin" tabindex="2" readonly>
+                    </li>
+                    <li>
+                        <input placeholder="and Roozbeh" tabindex="3" readonly>
+                    </li>
+                    <li>
+                        <input placeholder="Simulation Project" tabindex="4" readonly>
+                    </li>
+                    <li>
+                        <input name="l_distro" placeholder="L distr (expo|pareto)" tabindex="5" required
+                            pattern="(expo)|(pareto)">
+                    </li>
+                    <li>
+                        <input name="part" placeholder="part (a..e)" tabindex="6" required pattern="a|b|c|d|e">
+                    </li>
+                    <li>
+                        <input placeholder="When ready," tabindex="7" readonly>
+                    </li>
+                    <li>
+                        <input placeholder="press Enter to Send." tabindex="8" readonly>
+                    </li>
+                </ul>
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+    <!-- partial -->
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+    <script src="./static/script.js"></script>
+
+</body>
+
+</html>

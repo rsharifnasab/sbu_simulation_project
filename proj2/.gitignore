@@ -1,1 +1,10 @@
+*.pdf
+*.zip 
+templates/result.html
+*.csv
 *.png
+simulation_survival_time.html
+simulation_output_survival_time.csv
+simulate_isolation_by_distribution.html
+simulation_output_isolation_by_distribution.csv
+result.html

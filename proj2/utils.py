@@ -46,7 +46,7 @@ def is_irreducable(G):
 
 
 graph_providers = {
-    'ER': lambda n, p: nx.erdos_renyi_graph(n=n, p=p), # ok
+    'ER': lambda n, p: nx.erdos_renyi_graph(n=n, p=p),  # ok
     'WS': lambda n, p: nx.newman_watts_strogatz_graph(n=n, k=int(0.1 * n), p=p),
     'BA': lambda n, p: nx.barabasi_albert_graph(n=n+1, m=int(n**p))
 }
@@ -76,18 +76,21 @@ def calculate_equation_3(G, p):
     summ = np.sum([p**k_i[1] for k_i in G.degree])
     return np.e**(-(1-p)*summ)
 
+
 def calculate_survival_time(n, l, s=None,
                             p_list=np.linspace(0.1, 1, 10, dtype=float),
                             # p_list=[0.5],
                             mode='Static',
                             number_of_simulations=100):
+    print("A) calculating survival time")
     df = None
     for p in p_list:
         k_Et_dict = {}
         for _ in range(number_of_simulations):
             k_list = []
             graph = graph_providers["ER"](n, p)
-            remove_nodes_priority = [(x, y) for x, y in sorted(zip(l, graph.nodes))]
+            remove_nodes_priority = [(x, y)
+                                     for x, y in sorted(zip(l, graph.nodes))]
             for node in remove_nodes_priority:
                 graph.remove_node(node[1])
                 if (graph.number_of_nodes() == 0 or not nx.is_connected(graph)):
@@ -120,31 +123,38 @@ def calculate_survival_time(n, l, s=None,
                 else:
                     k_prev_counter += 1
                     k_prev_sum += curr_time
-        if (len(k_Et_dict) == 0):
+        if len(k_Et_dict) == 0:
             continue
         lists = sorted(k_Et_dict.items())
         x, y = zip(*lists)
         if df is None:
-            df = pd.DataFrame({'k':x, 'E_t':np.array(y)/number_of_simulations, 'p':[p for _ in range(len(x))]})
+            df = pd.DataFrame({'k': x, 'E_t': np.array(
+                y)/number_of_simulations, 'p': [p for _ in range(len(x))]})
         else:
-            _ = pd.DataFrame({'k':x, 'E_t':np.array(y)/number_of_simulations, 'p':[p for _ in range(len(x))]})
+            _ = pd.DataFrame({'k': x, 'E_t': np.array(
+                y)/number_of_simulations, 'p': [p for _ in range(len(x))]})
             df = pd.concat([df, _], ignore_index=True)
+    
+    print("done")
     df.to_csv('simulation_output_survival_time.csv', index=False)
     fig = px.line(df, x='k', y='E_t', color='p')
-    fig.show()
+    # fig.show()
     fig.write_html("simulation_survival_time.html")
-    pass
 
-def simulate_isolation_by_distribution(n, number_of_simulations=100, pareto_scale=2.62, number_of_plotting_points = 100):
+
+def simulate_isolation_by_distribution(n, number_of_simulations=100, pareto_scale=2.62, number_of_plotting_points=100):
+    print("D) calculating isolation by distro")
     expo_list = []
     expo_isolation_list = []
     pareto_list = []
     pareto_isolation_list = []
     for distro in [expon, pareto]:
         if distro.name == 'expon':
-            p_list = [distro.pdf(x) for x in np.linspace(distro.ppf(0.01), distro.ppf(0.99), number_of_plotting_points)]
+            p_list = [distro.pdf(x) for x in np.linspace(distro.ppf(
+                0.01), distro.ppf(0.99), number_of_plotting_points)]
         else:
-            p_list = [distro.pdf(x, pareto_scale) for x in np.linspace(distro.ppf(0.01, pareto_scale), distro.ppf(0.99, pareto_scale), number_of_plotting_points)]
+            p_list = [distro.pdf(x, pareto_scale) for x in np.linspace(distro.ppf(
+                0.01, pareto_scale), distro.ppf(0.99, pareto_scale), number_of_plotting_points)]
 
         for p in p_list:
             isolation_rate = 0
@@ -159,22 +169,30 @@ def simulate_isolation_by_distribution(n, number_of_simulations=100, pareto_scal
             else:
                 pareto_list.append(p)
                 pareto_isolation_list.append(isolation_rate)
-    _expo = pd.DataFrame({'p': expo_list, 'isolation_rate': expo_isolation_list, 'distribution': ['expo' for _ in range(number_of_plotting_points)]})
-    _pareto = pd.DataFrame({'p': pareto_list, 'isolation_rate': pareto_isolation_list, 'distribution': ['pareto' for _ in range(number_of_plotting_points)]})
+    _expo = pd.DataFrame({'p': expo_list, 'isolation_rate': expo_isolation_list, 'distribution': [
+                         'expo' for _ in range(number_of_plotting_points)]})
+    _pareto = pd.DataFrame({'p': pareto_list, 'isolation_rate': pareto_isolation_list, 'distribution': [
+                           'pareto' for _ in range(number_of_plotting_points)]})
+
     df = pd.concat([_expo, _pareto], ignore_index=True)
+    
+    print("done")
     df.to_csv('simulation_output_isolation_by_distribution.csv', index=False)
     fig = px.line(df, x='p', y='isolation_rate', color='distribution')
-    fig.show()
+    #fig.show()
     fig.write_html("simulate_isolation_by_distribution.html")
 
+
 def simulate_isolation_survival_by_pareto_shape(n, number_of_simulations=100, scale=1, number_of_plotting_points=100):
+    print("E) calculating isolation survival  by pareto shape")
     shape_list = []
     p_list = []
     isolation_list = []
     survival_list = []
 
     for shape in np.geomspace(0.01, 10, 100):
-        pareto_list = [(shape*pareto.pdf(x, scale)) for x in np.linspace(pareto.ppf(0.01, scale), pareto.ppf(0.99, scale), number_of_plotting_points)]
+        pareto_list = [(shape*pareto.pdf(x, scale)) for x in np.linspace(
+            pareto.ppf(0.01, scale), pareto.ppf(0.99, scale), number_of_plotting_points)]
         survival_time = np.max(pareto_list)
         for p in pareto_list:
             isolation_rate = 0
@@ -187,13 +205,23 @@ def simulate_isolation_survival_by_pareto_shape(n, number_of_simulations=100, sc
             isolation_list.append(isolation_rate)
             shape_list.append(shape)
             survival_list.append(survival_time)
-        
-    df = pd.DataFrame({'p': p_list, 'isolation_rate': isolation_list, 'shape': shape_list, 'survival_time': survival_list})
-    df.to_csv('simulation_output_isolation_survival_by_pareto_shape.csv', index=False)
-    fig = px.scatter_3d(df, x='p', y='isolation_rate', z='survival_time', color='shape')
-    fig.show()
+
+    df = pd.DataFrame({'p': p_list, 'isolation_rate': isolation_list,
+                      'shape': shape_list, 'survival_time': survival_list})
+
+    print("done")
+
+    df.to_csv(
+        'simulation_output_isolation_survival_by_pareto_shape.csv', index=False)
+    fig = px.scatter_3d(df, x='p', y='isolation_rate',
+                        z='survival_time', color='shape')
+    #fig.show()
     fig.write_html("simulate_isolation_survival_by_pareto_shape.html")
+
+
     fig = px.line(df, x='p', y='isolation_rate', color='shape')
     fig.write_html("simulate_isolation_by_pareto_shape.html")
+
+
     fig = px.line(df, x='p', y='survival_time', color='shape')
     fig.write_html("simulate_survival_by_pareto_shape.html")

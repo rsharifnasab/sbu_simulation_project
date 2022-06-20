@@ -4,6 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import plotly.express as px
 from scipy.stats import pareto, expon
+from tqdm import tqdm
 
 
 def draw_graph(G):
@@ -84,7 +85,7 @@ def calculate_survival_time(n, l, s=None,
                             number_of_simulations=100):
     print("A) calculating survival time")
     df = None
-    for p in p_list:
+    for p in tqdm(p_list):
         k_Et_dict = {}
         for _ in range(number_of_simulations):
             k_list = []
@@ -156,7 +157,7 @@ def simulate_isolation_by_distribution(n, number_of_simulations=100, pareto_scal
             p_list = [distro.pdf(x, pareto_scale) for x in np.linspace(distro.ppf(
                 0.01, pareto_scale), distro.ppf(0.99, pareto_scale), number_of_plotting_points)]
 
-        for p in p_list:
+        for p in tqdm(p_list):
             isolation_rate = 0
             for _ in range(number_of_simulations):
                 graph = graph_providers["ER"](n, p)
@@ -190,7 +191,7 @@ def simulate_isolation_survival_by_pareto_shape(n, number_of_simulations=100, sc
     isolation_list = []
     survival_list = []
 
-    for shape in np.geomspace(0.01, 10, 100):
+    for shape in tqdm(np.geomspace(0.01, 10, 100)):
         pareto_list = [(shape*pareto.pdf(x, scale)) for x in np.linspace(
             pareto.ppf(0.01, scale), pareto.ppf(0.99, scale), number_of_plotting_points)]
         survival_time = np.max(pareto_list)

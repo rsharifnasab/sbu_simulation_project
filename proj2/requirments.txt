@@ -1,0 +1,7 @@
+Flask
+matplotlib
+numpy
+pandas
+plotly
+scipy
+tqdm

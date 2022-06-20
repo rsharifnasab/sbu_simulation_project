@@ -1,3 +1,4 @@
+outputs
 *.pdf
 *.zip 
 templates/result.html

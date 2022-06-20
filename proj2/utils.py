@@ -45,6 +45,16 @@ def is_irreducable(G):
     """
     return nx.algorithms.all_pairs_node_connectivity(G)
 
+def is_irreducable_2(G):
+    n = G.number_of_nodes
+    mat = np.zeros((n,n))
+    for i, node1 in enumerate(G.nodes):
+        for j, node2 in enumerate(G.nodes):
+            mat[i,j] =  nx.node_connectivity(node1, node2)
+    
+    expected = np.ones((n,n)) * (-2) + 1
+    return expected == mat
+
 
 graph_providers = {
     'ER': lambda n, p: nx.erdos_renyi_graph(n=n, p=p),  # ok

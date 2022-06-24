@@ -216,6 +216,56 @@ def simulate_survival_by_search(n, number_of_simulations=100, pareto_scale=1, pa
     # fig.show()
     fig.write_html("simulate_survival_by_search.html")
 
+def simulate_isolation_by_search(n, number_of_simulations=100, pareto_scale=1, pareto_shape = 3, expo_lambda = 2, number_of_plotting_points=100):
+    s_mean_list = [[], []]
+    phi_mean_list = [[], []]
+    for multiply in np.linspace(0.1, 100, number_of_plotting_points):
+        s_mean = []
+        phi_mean = []
+        for _ in range(number_of_simulations):
+            s_list = []
+            phi_list = []
+            graph = nx.random_regular_graph(d=10, n=n)
+            l = None
+            events = None
+            l = [(x, y, z) for x, y, z in sorted(zip(np.random.exponential(scale=(1/expo_lambda)*multiply, size=n), np.arange(n), ['l' for _ in np.arange(n)]))]
+            events = l
+
+            for event in events:
+                if event[2] == 'l':
+                    neighbors = graph.neighbors(event[1])
+                    graph.remove_node(event[1])
+                    for neighbor in neighbors:
+                        if len(list(graph.neighbors(neighbor))) == 0:
+                            phi_list.append(event[0])
+                            # if np.random.random() > 0.5:
+                            s_ = None
+                            s_ = np.random.exponential(scale=(1/expo_lambda) * multiply/10)
+                            events.append((s_, neighbor, 's'))
+                            s_list.append(s_)
+                elif event[2] == 's':
+                    if not graph.has_node(event[1]):
+                        continue
+                    non_neighbors = list(nx.non_neighbors(graph, event[1]))
+                    if len(non_neighbors) == 0:
+                        continue
+                    to_add_node = np.random.choice(non_neighbors)
+                    graph.add_edge(event[1], to_add_node)
+                events = sorted(events)
+                phi_list.append([d for _, d in graph.degree].count(0) / n)
+
+            s_mean.append(np.mean(s_list))
+            phi_mean.append(np.mean(phi_list))
+        s_mean_list[0].append(np.mean(s_mean))
+        phi_mean_list[0].append(np.mean(phi_mean))
+
+    df = pd.DataFrame({'E[s]': s_mean_list[0], 'Phi': phi_mean_list[0], 'distribution': 'pareto'})
+
+    df.to_csv('simulation_output_isolation_by_search.csv', index=False)
+    fig = px.scatter(df, x='E[s]', y='Phi', color='distribution')
+    # fig.show()
+    fig.write_html("simulate_isolation_by_search.html")
+
 def simulate_isolation_by_distribution(n, number_of_simulations=100, pareto_scale=2.62, number_of_plotting_points=100):
     print("D) calculating isolation by distro")
     expo_list = []

@@ -152,6 +152,69 @@ def calculate_survival_time(n, l, s=None,
     # fig.show()
     fig.write_html("simulation_survival_time.html")
 
+def simulate_survival_by_search(n, number_of_simulations=100, pareto_scale=1, pareto_shape = 3, expo_lambda = 2, number_of_plotting_points=100):
+    _expo = None
+    _pareto = None
+    s_mean_list = [[], []]
+    t_mean_list = [[], []]
+    for distro in ['expon', 'pareto']:
+        for multiply in tqdm(np.linspace(0.1, 100, 10), position=1):
+            s_mean = []
+            t_mean = []
+            for _ in tqdm(range(number_of_simulations), position=0, ascii=True):
+                s_list = []
+                t_list = []
+                graph = nx.random_regular_graph(d=10, n=n)
+                l = None
+                events = None
+                if distro == 'expon':
+                    l = [(x, y, z) for x, y, z in sorted(zip(np.random.exponential(scale=(1/expo_lambda)*multiply, size=n), np.arange(n), ['l' for _ in np.arange(n)]))]
+                else:
+                    l = [(x, y, z) for x, y, z in sorted(zip(np.random.pareto(pareto_scale, size=n) * pareto_shape*multiply/100, np.arange(n), ['l' for _ in np.arange(n)]))]
+                events = l
+
+                for event in events:
+                    if event[2] == 'l':
+                        neighbors = graph.neighbors(event[1])
+                        graph.remove_node(event[1])
+                        for neighbor in neighbors:
+                            if len(list(graph.neighbors(neighbor))) == 0:
+                                t_list.append(event[0])
+                                # if np.random.random() > 0.5:
+                                s_ = None
+                                if distro == 'expon':
+                                    s_ = np.random.exponential(scale=(1/expo_lambda) * multiply/10)
+                                else:
+                                    s_ = np.random.pareto(pareto_scale) * pareto_shape * multiply/100/10
+                                events.append((s_, neighbor, 's'))
+                                s_list.append(s_)
+                    elif event[2] == 's':
+                        if not graph.has_node(event[1]):
+                            continue
+                        non_neighbors = list(nx.non_neighbors(graph, event[1]))
+                        if len(non_neighbors) == 0:
+                            continue
+                        to_add_node = np.random.choice(non_neighbors)
+                        graph.add_edge(event[1], to_add_node)
+                    events = sorted(events)
+
+                s_mean.append(np.mean(s_list))
+                t_mean.append(np.mean(t_list))
+            if distro == 'expon':
+                s_mean_list[0].append(np.mean(s_mean))
+                t_mean_list[0].append(-np.mean(t_mean))
+            else:
+                s_mean_list[1].append(np.mean(s_mean))
+                t_mean_list[1].append(-np.mean(t_mean))
+
+    _expo = pd.DataFrame({'E[s]': s_mean_list[0], 'E[t]': t_mean_list[0]-2*np.min(t_mean_list[0]), 'distribution': 'pareto'})
+    _pareto = pd.DataFrame({'E[s]': s_mean_list[1], 'E[t]': t_mean_list[1]-2*np.min(t_mean_list[1]), 'distribution': 'expon'})
+
+    df = pd.concat([_expo, _pareto], ignore_index=True)
+    df.to_csv('simulation_output_survival_by_search.csv', index=False)
+    fig = px.scatter(df, x='E[s]', y='E[t]', color='distribution')
+    # fig.show()
+    fig.write_html("simulate_survival_by_search.html")
 
 def simulate_isolation_by_distribution(n, number_of_simulations=100, pareto_scale=2.62, number_of_plotting_points=100):
     print("D) calculating isolation by distro")

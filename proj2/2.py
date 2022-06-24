@@ -21,6 +21,9 @@ elif L_DISTRIBUTION == 'Pareto':
 # Part a
 calculate_survival_time(N_UP_LIMIT, l, mode=MODE)
 
+# Part b
+simulate_survival_by_search(N_UP_LIMIT, number_of_simulations=EPOCHS//10, pareto_scale=PARETO_SCALE, pareto_shape = PARETO_SHAPE, expo_lambda = EXPO_LAMBDA, number_of_plotting_points=100)
+
 # Part d
 simulate_isolation_by_distribution(N_UP_LIMIT//10, number_of_simulations=EPOCHS, pareto_scale=PARETO_SCALE)
 
